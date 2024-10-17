@@ -11,6 +11,7 @@ const todoSchema = new Schema({
     completed: {type: Boolean, default: false}
 
 });
+{timestamps: true}';'
 
 todoSchema.plugin(toJSON)
 

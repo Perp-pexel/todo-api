@@ -25,7 +25,7 @@ export const localUpload = multer({dest: 'uploads/'});
 export const userAvatarUpload = multer({
     storage: multerSaveFilesOrg({
         apiAccessToken: process.env.SAVEFILESORG_API_KEY,
-        relativePath: '/todo-api/users/*'
+        relativePath: '/todo-api/users/*' 
 
     }),
     preservePath: true
