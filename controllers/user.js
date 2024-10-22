@@ -1,7 +1,8 @@
 import { logInUserValidator, registerUserValidator } from "../validator/user.js";
 import { UserModel } from "../models/user.js";
 import bcrypt from "bcryptjs";
-import jwt from "jsonwebtoken"
+import jwt from "jsonwebtoken";
+import { mailTransporter } from "../utils/mail.js";
  
 
 export const registerUser= async (req, res, next) => {
@@ -24,8 +25,13 @@ export const registerUser= async (req, res, next) => {
             password: hashedPassword
         });
         // Send user confirmational email
+        await mailTransporter.sendMail({
+            to: value.email,
+            subject: 'User Registration',
+            text: 'Account registered successfully'
+        });
         // Respond to request 
-        res.json('Register user!');
+        res.json('Registered user!');
     } catch (error) {
         next (error);
         
@@ -51,7 +57,7 @@ export const logInUser = async (req, res, next) => {
     }
     // Sign a token for user
     const token = jwt.sign(
-        {id:user.id},
+        {id: user.id},
         process.env.JWT_PRIVATE_KEY,
         { expiresIn: '24h'}
     );
@@ -66,13 +72,31 @@ export const logInUser = async (req, res, next) => {
    }
 }
 
-export const getProfile =  (req, res, next) => {
-    res.json('User profile')
+export const getProfile = async(req, res, next) => {
+    try {
+        console.log(req.auth);
+        // Find authentcated user from database
+        const user = await UserModel
+        // .findById(req.user.id) *when writtinng own code
+        .findById(req.auth.id)
+        .select({ password: false });
+        // Respond to request
+        res.json(user);
+    } catch (error) {
+      next (error);
+    }
 }
 export const logOutUser = (req, res, next) => {
     res.json('User checked out!');
 }
 
 export const updateProfile = (req, res, next) => {
-    res.json('User profile updated');
+    try {
+        // Validate user input
+        const { error, value } = updateProfileValidator.validate(req.body);
+        res.json('User profile updated');
+    } catch (error) {
+        next(error);
+        
+    }
 }
